@@ -1,6 +1,6 @@
-import Cart from "../models/CartModel";
-import Order from "../models/OrderModel";
-import Product from "../models/ProductMngmt";
+import Cart from "../models/CartModel.js";
+import Order from "../models/OrderModel.js";
+import Product from "../models/ProductMngmt.js";
 
 // =================
 // CREATE ORDER

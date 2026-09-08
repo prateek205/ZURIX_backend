@@ -47,7 +47,7 @@ export const addToCart = async (req, res) => {
     const { product, quantity, size, color } = req.body;
 
     // find the product based on the productId
-    const product = await Product.findById(productId);
+    const products = await Product.findById(productId);
 
     // validate the product is available or not.
     if (!product) {
