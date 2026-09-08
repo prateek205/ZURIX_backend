@@ -1,16 +1,16 @@
 import express from "express";
 import {
-  cancelOrder,
-  createOrder,
-  getAllOrder,
-  getOrderById,
-} from "../controllers/OrderController";
+  addToCart,
+  getAllCart,
+  removeCartItem,
+  updateCartItem,
+} from "../controllers/CartController.js";
 
 const router = express.Router();
 
-router.post("/createOrder", createOrder);
-router.get("/getAllOrders", getAllOrder);
-router.get("/getOrderById", getOrderById);
-router.delete("/cancelOrder", cancelOrder);
+router.post("/addToCart", addToCart);
+router.get("/getCart", getAllCart);
+router.put("/updateCart", updateCartItem);
+router.delete("/removeCart", removeCartItem);
 
 export default router;
