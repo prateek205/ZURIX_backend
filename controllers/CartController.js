@@ -205,6 +205,16 @@ export const updateCartItem = async (req, res) => {
         .json({ success: false, message: "Item not found" });
     }
 
+    // find the product based on it's productId
+    const product = await Product.findById(item.productId);
+
+    // validates wheather the product is correct or not.
+    if (!product) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product not found" });
+    }
+
     // in this we can be increment and decrement the product quantity.
     if (action === "inc") {
       if (item.quantity >= product.stock) {
@@ -230,16 +240,6 @@ export const updateCartItem = async (req, res) => {
     console.log("ITEM ID:", itemId);
     console.log("FOUND ITEM:", item);
     console.log("PRODUCT ID IN ITEM:", item.productId);
-
-    // find the product based on it's productId
-    const product = await Product.findById(item.productId);
-
-    // validates wheather the product is correct or not.
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product not found" });
-    }
 
     // validates the quantity should not be exceed over the product stock.
     if (item.quantity > product.stock) {
