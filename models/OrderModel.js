@@ -43,6 +43,7 @@ const OrderSchema = new mongoose.Schema(
       },
       mobileNumber: {
         type: String,
+        min:10,
         required: true,
       },
       city: {

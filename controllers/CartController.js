@@ -159,7 +159,7 @@ export const addToCart = async (req, res) => {
   } catch (error) {
     // show the error the if item not added to cart.
     console.log("ADD_TO_CART", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 

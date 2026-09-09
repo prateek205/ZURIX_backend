@@ -48,7 +48,7 @@ export const createOrder = async (req, res) => {
 
     for (const cartItems of cart.items) {
       //   find the product in the cart item.
-      const product = await Product.findById(cartItem.product);
+      const product = await Product.findById(cartItems.productId);
 
       // validate the product is not there in cartItem
       if (!product) {
@@ -67,7 +67,7 @@ export const createOrder = async (req, res) => {
       }
 
       //   validate the product is below the stock.
-      if (product.stock < cartItem.quantity) {
+      if (product.stock < cartItems.quantity) {
         return res.status(400).json({
           success: false,
           message: `Product stock is not available for ${product.name}`,
@@ -75,17 +75,17 @@ export const createOrder = async (req, res) => {
       }
 
       //   calculate the item.
-      const totalItem = product.price * cartItem.quantity;
+      const totalItem = product.salePrice * cartItems.quantity;
 
       subtotal += totalItem;
 
       //   take the product information.
       orderItems.push({
         productId: product._id,
-        quantity: cartItem.quantity,
-        price: product.price,
-        size: cartItem.size,
-        color: cartItem.color,
+        quantity: cartItems.quantity,
+        price: product.salePrice,
+        size: cartItems.size,
+        color: cartItems.color,
       });
     }
 
@@ -93,24 +93,24 @@ export const createOrder = async (req, res) => {
     const shippingCharges = subtotal >= 1000 ? 0 : 100;
 
     // calculate the final amount with subtotal and shipping charges.
-    const finalAmount = subtotal + shippingCharges;
+    const totalAmount = subtotal + shippingCharges;
 
     // atlast then create the order with all information.
     const order = await Order.create({
       user: req.existsUser.user,
-      items: cartItems,
+      items: orderItems,
       shippingAddress,
       paymentMethod,
       paymentStatus: "PENDING",
       orderStatus: "PENDING",
       subtotal,
       shippingCharges,
-      finalAmount,
+      totalAmount,
     });
 
     // now after order creation then reduce the quantity of that product.
     for (const cartItem of cart.items) {
-      await Product.findByIdAndUpdate(cartItem.product, {
+      await Product.findByIdAndUpdate(cartItem.productId, {
         $inc: {
           stock: -cartItem.quantity,
         },
