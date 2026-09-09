@@ -174,13 +174,13 @@ export const updateCartItem = async (req, res) => {
     // bring the itemId from the cart where the item is added.
     const { itemId } = req.params;
     // bring the quantity from the body where the itemSchema is there.
-    const { productId, quantity } = req.body;
+    const { action } = req.body;
 
-    // validates the quantity which should not be less the default quantity.
-    if (!quantity || quantity < 1) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Item must be atleast 1" });
+    if (!action) {
+      return res.status(400).json({
+        success: false,
+        message: "Action is required",
+      });
     }
 
     // find the user wheather it have added item to cart.
@@ -206,14 +206,25 @@ export const updateCartItem = async (req, res) => {
     }
 
     // in this we can be increment and decrement the product quantity.
-    if (action == "inc") {
-      item.quantity += 1;
-    }
-
-    if (action == "dec") {
-      if (item.quantity > 1) {
-        item.quantity -= 1;
+    if (action === "inc") {
+      if (item.quantity >= product.stock) {
+        return res.status(400).json({
+          success: false,
+          message: "Product stock limit reached",
+        });
       }
+      item.quantity += 1;
+    } else if (action === "dec") {
+      if (item.quantity <= 1) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Item cannot be less then 1" });
+      }
+      item.quantity -= 1;
+    } else {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Action. use inc or dec" });
     }
 
     console.log("ITEM ID:", itemId);
@@ -231,14 +242,11 @@ export const updateCartItem = async (req, res) => {
     }
 
     // validates the quantity should not be exceed over the product stock.
-    if (quantity > product.stock) {
+    if (item.quantity > product.stock) {
       return res
         .status(400)
         .json({ success: false, message: "Product is exceed over the stock" });
     }
-
-    // after validating all query the item quantity should update.
-    item.quantity = quantity;
 
     // the save the update item to mongodb.
     await cart.save();
