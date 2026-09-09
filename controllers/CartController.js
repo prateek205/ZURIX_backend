@@ -9,8 +9,8 @@ export const getAllCart = async (req, res) => {
   try {
     // find wheather the user logged-in and show the list of item which add to his cart.
     const cart = await Cart.findOne({
-      auth: req.auth._id,
-    }).populate("items.product");
+      user: req.existsUser.user,
+    }).populate("items.productId");
 
     // validates the data wheather cart it is empty or not.
     if (!cart) {
@@ -27,7 +27,7 @@ export const getAllCart = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Items Fetch Successfully",
-      count: cart.length,
+      count: cart.items.length,
       data: cart,
     });
   } catch (error) {
@@ -44,10 +44,13 @@ export const getAllCart = async (req, res) => {
 export const addToCart = async (req, res) => {
   try {
     // bring the data from cart model.
-    const { product, quantity, size, color } = req.body;
+    const { productId, quantity, size, color } = req.body;
+
+    console.log("BODY:", req.body);
+    console.log("PRODUCT ID:", productId);
 
     // find the product based on the productId
-    const products = await Product.findById(productId);
+    const product = await Product.findById(productId);
 
     // validate the product is available or not.
     if (!product) {
@@ -79,16 +82,21 @@ export const addToCart = async (req, res) => {
 
     // find out the user is logged-in.
     let cart = await Cart.findOne({
-      auth: req.auth._id,
+      user: req.existsUser.user,
     });
 
     // validate the cart is empty or not wheather it empty then create the new cart.
     if (!cart) {
+      console.log("USER ID:", req.existsUser?._id);
+      console.log("PRODUCT ID:", productId);
+      console.log("QUANTITY:", quantity);
+      console.log("SIZE:", size);
+      console.log("COLOR:", color);
       cart = new Cart({
-        auth: req.auth._id,
+        user: req.existsUser.user,
         items: [
           {
-            product: productId,
+            productId: productId,
             quantity,
             size,
             color,
@@ -97,12 +105,27 @@ export const addToCart = async (req, res) => {
       });
     }
 
+    // save the item to mongodb.
+    await cart.save();
+
+    // send response of item added to cart.
+    res.status(201).json({
+      success: true,
+      message: "Item added to cart successfully",
+      data: cart,
+    });
+
     //   Check the product according to it's Varient.
 
-    const existItem = cart.item.find(
-      (item) => item.product.toString() === productId,
-      item.size === size,
-      item.color === color,
+    console.log("CART:", cart);
+    console.log("CART_ITEM:", cart.item);
+
+    const existItem = cart.items.find(
+      (item) =>
+        item.productId &&
+        item.productId.toString() === productId &&
+        item.size === size &&
+        item.color === color,
     );
 
     if (existItem) {
@@ -116,8 +139,8 @@ export const addToCart = async (req, res) => {
       }
       existItem.quantity = newQty;
     } else {
-      cart.item.push({
-        product: productId,
+      cart.items.push({
+        productId: productId,
         quantity,
         size,
         color,
@@ -149,7 +172,7 @@ export const updateCartItem = async (req, res) => {
     // bring the itemId from the cart where the item is added.
     const { itemId } = req.params;
     // bring the quantity from the body where the itemSchema is there.
-    const { quantity } = req.body;
+    const { productId, quantity } = req.body;
 
     // validates the quantity which should not be less the default quantity.
     if (!quantity || quantity < 1) {
@@ -160,7 +183,7 @@ export const updateCartItem = async (req, res) => {
 
     // find the user wheather it have added item to cart.
     const cart = await Cart.findOne({
-      auth: req.auth._id,
+      user: req.existsUser.user,
     });
 
     // validates wheather cart found or not.
@@ -171,7 +194,7 @@ export const updateCartItem = async (req, res) => {
     }
 
     // find the item based on it's itemId.
-    const item = cart.item.id(itemId);
+    const item = cart.items.id(itemId);
 
     // validates the item is correct or not.
     if (!item) {
@@ -180,8 +203,12 @@ export const updateCartItem = async (req, res) => {
         .json({ success: false, message: "Item not found" });
     }
 
+    console.log("ITEM ID:", itemId);
+    console.log("FOUND ITEM:", item);
+    console.log("PRODUCT ID IN ITEM:", item.productId);
+
     // find the product based on it's productId
-    const product = await Product.findById(productId);
+    const product = await Product.findById(item.productId);
 
     // validates wheather the product is correct or not.
     if (!product) {
@@ -227,7 +254,7 @@ export const removeCartItem = async (req, res) => {
 
     // find the cart of user.
     const cart = await Cart.findOne({
-      auth: req.auth._id,
+      user: req.existsUser.user,
     });
 
     // validates the cart of user is not
@@ -251,7 +278,9 @@ export const removeCartItem = async (req, res) => {
     item.deleteOne();
 
     // save to mongo db
-    await item.save();
+    await cart.save();
+
+    console.log("CART AFTER DELETE:", cart);
 
     // send the response.
     res
@@ -272,7 +301,7 @@ export const clearCart = async (req, res) => {
   try {
     // find the cart of user.
     const cart = await Cart.findOne({
-      auth: req.auth.id,
+      user: req.existsUser.user,
     });
 
     // validate the cart is of user or not.

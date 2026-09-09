@@ -26,7 +26,7 @@ export const createOrder = async (req, res) => {
 
     // check the user cart
     const cart = await Cart.findOne({
-      Auth: req.Auth._id,
+      user: req.existsUser._id,
     });
 
     if (!cart) {
@@ -97,7 +97,7 @@ export const createOrder = async (req, res) => {
 
     // atlast then create the order with all information.
     const order = await Order.createOrder({
-      user: req.Auth._id,
+      user: req.existsUser._id,
       items: cartItem,
       shippingAddress,
       paymentMethod,
@@ -144,7 +144,7 @@ export const getAllOrder = async (req, res) => {
   try {
     // find the user's order
     const order = await Order.find({
-      user: req.user._id,
+      user: req.existsUser._id,
     })
       .populate("items.prdoduct")
       .sort("-createdAt");
@@ -175,7 +175,7 @@ export const getOrderById = async (req, res) => {
     // find the order based on it's orderId, userId
     const order = await Order.findById({
       _id: id,
-      user: req.user._id,
+      user: req.existsUser._id,
     }).populate("items.product");
 
     // validates if the order is not found
@@ -206,7 +206,7 @@ export const cancelOrder = async (req, res) => {
     // find the order based on the order id and user id which have order it.
     const order = await Order.findOne({
       _id: id,
-      user: req.user._id,
+      user: req.existsUser._id,
     });
 
     // validate the order wheather it having or not.
