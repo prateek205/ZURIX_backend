@@ -26,7 +26,7 @@ export const createOrder = async (req, res) => {
 
     // check the user cart
     const cart = await Cart.findOne({
-      user: req.existsUser._id,
+      user: req.existsUser.user,
     });
 
     if (!cart) {
@@ -36,7 +36,7 @@ export const createOrder = async (req, res) => {
     }
 
     // validates the cart items
-    if (!cart.item || cart.item.length === 0) {
+    if (!cart.items || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
@@ -46,7 +46,7 @@ export const createOrder = async (req, res) => {
 
     let subtotal = 0;
 
-    for (const cartItem of cart.items) {
+    for (const cartItems of cart.items) {
       //   find the product in the cart item.
       const product = await Product.findById(cartItem.product);
 
@@ -81,7 +81,7 @@ export const createOrder = async (req, res) => {
 
       //   take the product information.
       orderItems.push({
-        product: product._id,
+        productId: product._id,
         quantity: cartItem.quantity,
         price: product.price,
         size: cartItem.size,
@@ -90,18 +90,18 @@ export const createOrder = async (req, res) => {
     }
 
     // give the shipping charges as per the subtotal amount.
-    const shippingCharges = subtotal > 1000 ? 0 : 100;
+    const shippingCharges = subtotal >= 1000 ? 0 : 100;
 
     // calculate the final amount with subtotal and shipping charges.
     const finalAmount = subtotal + shippingCharges;
 
     // atlast then create the order with all information.
-    const order = await Order.createOrder({
-      user: req.existsUser._id,
-      items: cartItem,
+    const order = await Order.create({
+      user: req.existsUser.user,
+      items: cartItems,
       shippingAddress,
       paymentMethod,
-      paymentStatus: paymentMethod === "COD" ? "PENDING" : "PENDING",
+      paymentStatus: "PENDING",
       orderStatus: "PENDING",
       subtotal,
       shippingCharges,
@@ -118,7 +118,7 @@ export const createOrder = async (req, res) => {
     }
 
     // clear the cart.
-    cart.item = [];
+    cart.items = [];
 
     // save to mongodb.
     await cart.save();
@@ -144,9 +144,9 @@ export const getAllOrder = async (req, res) => {
   try {
     // find the user's order
     const order = await Order.find({
-      user: req.existsUser._id,
+      user: req.existsUser.user,
     })
-      .populate("items.prdoduct")
+      .populate("items.productId")
       .sort("-createdAt");
 
     // send the response the for fetching the order
@@ -175,8 +175,8 @@ export const getOrderById = async (req, res) => {
     // find the order based on it's orderId, userId
     const order = await Order.findById({
       _id: id,
-      user: req.existsUser._id,
-    }).populate("items.product");
+      user: req.existsUser.user,
+    }).populate("items.productId");
 
     // validates if the order is not found
     if (!order) {
@@ -206,7 +206,7 @@ export const cancelOrder = async (req, res) => {
     // find the order based on the order id and user id which have order it.
     const order = await Order.findOne({
       _id: id,
-      user: req.existsUser._id,
+      user: req.existsUser.user,
     });
 
     // validate the order wheather it having or not.
@@ -228,8 +228,8 @@ export const cancelOrder = async (req, res) => {
     }
 
     // if the order cancelled then restore the product back into the quantity.
-    for (const item of order.item) {
-      await Product.findByIdAndUpdate(item.product, {
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.productId, {
         $inc: { stock: item.quantity },
       });
     }

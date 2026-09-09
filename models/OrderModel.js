@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
   {
-    product: {
+    productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: true,
@@ -34,7 +34,7 @@ const OrderSchema = new mongoose.Schema(
       ref: "Auth",
       required: true,
     },
-    item: [orderItemSchema],
+    items: [orderItemSchema],
     shippingAddress: {
       fullName: {
         type: String,
