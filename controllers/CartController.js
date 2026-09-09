@@ -159,7 +159,9 @@ export const addToCart = async (req, res) => {
   } catch (error) {
     // show the error the if item not added to cart.
     console.log("ADD_TO_CART", error);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -201,6 +203,17 @@ export const updateCartItem = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Item not found" });
+    }
+
+    // in this we can be increment and decrement the product quantity.
+    if (action == "inc") {
+      item.quantity += 1;
+    }
+
+    if (action == "dec") {
+      if (item.quantity > 1) {
+        item.quantity -= 1;
+      }
     }
 
     console.log("ITEM ID:", itemId);

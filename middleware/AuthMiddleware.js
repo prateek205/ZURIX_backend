@@ -16,6 +16,6 @@ export const protectedRoute = async (req, res, next) => {
     next();
   } catch (error) {
     console.log("PROTECTED_ROUTE:",error)
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(401).json({ success: false, message: "Not Authenticate" });
   }
 };
