@@ -124,7 +124,7 @@ export const getAllProducts = async (req, res) => {
 
     const sortOption = sort || "-createdAt";
 
-    const data = await Product.find(query).sort(sortOption).populate("category");
+    const data = await Product.find(query).sort(sortOption).populate("Category");
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
