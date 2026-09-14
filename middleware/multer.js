@@ -5,7 +5,7 @@ import cloudinary from "../utils/cloudinary.js";
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, res) => ({
-    folder: `{product_images/${req.body.category}/${req.body.product}}`,
+    folder: `{product_image/${req.body.category}/${req.body.product}}`,
 
     allowed_format: ["jpg", "png", "jpeg", "webp"],
 
@@ -15,13 +15,13 @@ const storage = new CloudinaryStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
-    "images/jpg",
-    "images/jpeg",
-    "images/png",
-    "images/webp",
+    "image/jpg",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
   ];
 
-  if (allowedTypes.includes(file.mimitype)) {
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb("only image file are allowed", false);
