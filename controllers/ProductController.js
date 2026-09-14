@@ -39,6 +39,13 @@ export const CreateProduct = async (req, res) => {
         .json({ success: false, message: "All feilds are mandatory..." });
     }
 
+    // *************** validate the image upload or not ***********
+    if (!req.files || req.files.length === 0) {
+      res
+        .status(400)
+        .json({ success: false, message: "Atleast one image is required" });
+    }
+
     // ********** Validation for product exists or not **********
 
     const productExists = await Product.findOne({ name });
@@ -47,6 +54,12 @@ export const CreateProduct = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Product Already Exists" });
     }
+
+    // ************ unpload image to cloudinary **************
+    const images = req.files.map((file) => ({
+      url: file.path,
+      publicId: file.filename,
+    }));
 
     // ********** stored all feilds in one variables **********
 
@@ -59,6 +72,7 @@ export const CreateProduct = async (req, res) => {
       size,
       colors,
       stock,
+      images,
       isFeatured,
       isActive,
     };
@@ -98,8 +112,8 @@ export const getAllProducts = async (req, res) => {
       };
     }
 
-    if(category){
-      query.category = category
+    if (category) {
+      query.category = category;
     }
 
     if (colors) {
@@ -124,7 +138,9 @@ export const getAllProducts = async (req, res) => {
 
     const sortOption = sort || "-createdAt";
 
-    const data = await Product.find(query).sort(sortOption).populate("category");
+    const data = await Product.find(query)
+      .sort(sortOption)
+      .populate("category");
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
