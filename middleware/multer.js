@@ -9,7 +9,7 @@ const storage = new CloudinaryStorage({
 
     allowed_format: ["jpg", "png", "jpeg", "webp"],
 
-    public_id: `${Date.now()}-${file.originalName}.split(".")[0].replace(/\s+/g,"-")}`,
+    public_id: `${Date.now()}-${file.originalname.split(".")[0].replace(/\s+/g,"-")}`,
   }),
 });
 
