@@ -14,6 +14,7 @@ dotenv.config();
 // ===== DOTENV PORT =====
 
 const PORT = process.env.SERVER_PORT || 5000;
+const CLIENT = process.env.FRONT-END_URL || "http://localhost:5173";
 
 // ===== MONGODB CONNECTION =====
 
@@ -26,7 +27,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: CLIENT,
     credentials:true,
   }),
 );
