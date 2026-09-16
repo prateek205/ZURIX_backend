@@ -14,7 +14,7 @@ dotenv.config();
 // ===== DOTENV PORT =====
 
 const PORT = process.env.SERVER_PORT || 5000;
-const CLIENT = process.env.FRONT-END_URL || "http://localhost:5173";
+const CLIENT = process.env.FRONT_END_URL || "http://localhost:5173";
 
 // ===== MONGODB CONNECTION =====
 
