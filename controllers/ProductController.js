@@ -140,7 +140,7 @@ export const getAllProducts = async (req, res) => {
 
     const data = await Product.find(query)
       .sort(sortOption)
-      .populate("category","name");
+      .populate("category");
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
@@ -156,7 +156,7 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await Product.findById(id);
+    const data = await Product.findById(id).populate("category","name");
     res
       .status(200)
       .json({ success: true, message: "Product fetch successfully", data });
