@@ -140,7 +140,7 @@ export const getAllProducts = async (req, res) => {
 
     const data = await Product.find(query)
       .sort(sortOption)
-      .populate("category");
+      .populate("category","name");
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
