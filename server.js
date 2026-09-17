@@ -14,7 +14,7 @@ dotenv.config();
 // ===== DOTENV PORT =====
 
 const PORT = process.env.SERVER_PORT || 5000;
-const CLIENT = process.env.FRONT_END_URL || "http://localhost:5173";
+const CLIENT = process.env.FRONT_END_URL;
 
 console.log("FRONT_END_URL:", process.env.FRONT_END_URL);
 console.log("CLIENT:", CLIENT);
@@ -30,8 +30,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: CLIENT,
-    credentials:true,
+    origin: [CLIENT, "http://localhost:5173"],
+    credentials: true,
   }),
 );
 
