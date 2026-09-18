@@ -123,7 +123,7 @@ export const getProfile = async (req, res) => {
     // ========== Get profile data ==========
     const profile = await Auths.findById(req.user).select("-password");
 
-    if (profile) {
+    if (!profile) {
       return res
         .status(400)
         .json({ success: false, message: "User not found" });
