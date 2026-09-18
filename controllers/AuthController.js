@@ -93,16 +93,21 @@ export const login = async (req, res) => {
 
     res.cookie("userToken", token, {
       httpOnly: true,
-      secure:false,
-      sameSite:"lax",
-      path:"/"
+      secure: false,
+      sameSite: "lax",
+      path: "/",
     });
 
     // ========== Response for user side ==========
 
     res
       .status(200)
-      .json({ success: true, message: "Login Successfull", user: existsUser, token:token });
+      .json({
+        success: true,
+        message: "Login Successfull",
+        user: existsUser,
+        token: token,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -116,7 +121,13 @@ export const login = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     // ========== Get profile data ==========
-    const profile = await Auths.find();
+    const profile = await Auths.findById(req.user).select("-password");
+
+    if (!profile) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    }
 
     // ========== response for user side ==========
 
@@ -138,12 +149,12 @@ export const getProfile = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("userToken",{
-        httpOnly:true,
-        secure:false,
-        sameSite:"lax",
-        path:"/"
-    })
+    res.clearCookie("userToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
     res
       .status(200)
       .json({ success: true, message: "User Logout Successfully!!!" });
