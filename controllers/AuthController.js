@@ -120,8 +120,13 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
+
+    const userId = req.existsUser.user
+
+    console.log("USERID:", userId)
+
     // ========== Get profile data ==========
-    const profile = await Auths.findById(req.user).select("-password");
+    const profile = await Auths.findById(userId).select("-password");
 
     if (!profile) {
       return res
