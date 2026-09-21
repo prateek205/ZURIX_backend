@@ -174,12 +174,12 @@ export const updateCartItem = async (req, res) => {
     // bring the itemId from the cart where the item is added.
     const { itemId } = req.params;
     // bring the quantity from the body where the itemSchema is there.
-    const { action } = req.body;
+    const { quantity } = req.body;
 
-    if (!action) {
+    if (!quantity) {
       return res.status(400).json({
         success: false,
-        message: "Action is required",
+        message: "Quantity is required",
       });
     }
 
@@ -216,30 +216,19 @@ export const updateCartItem = async (req, res) => {
     }
 
     // in this we can be increment and decrement the product quantity.
-    if (action === "inc") {
-      if (item.quantity >= product.stock) {
-        return res.status(400).json({
-          success: false,
-          message: "Product stock limit reached",
-        });
-      }
-      item.quantity += 1;
-    } else if (action === "dec") {
-      if (item.quantity <= 1) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Item cannot be less then 1" });
-      }
-      item.quantity -= 1;
-    } else {
+    if (quantity > product.stock) {
+      return res.status(400).json({
+        success: false,
+        message: "Product stock limit reached",
+      });
+    }
+    if (quantity < 1) {
       return res
-        .status(401)
-        .json({ success: false, message: "Invalid Action. use inc or dec" });
+        .status(400)
+        .json({ success: false, message: "Item cannot be less then 1" });
     }
 
-    console.log("ITEM ID:", itemId);
-    console.log("FOUND ITEM:", item);
-    console.log("PRODUCT ID IN ITEM:", item.productId);
+    item.quantity = quantity;
 
     // validates the quantity should not be exceed over the product stock.
     if (item.quantity > product.stock) {
