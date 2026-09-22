@@ -20,7 +20,7 @@ export const createAddress = async (req, res) => {
     }
 
     const newAddress = Address.create({
-      user: req.user._id,
+      user: req.existsUser.user,
       fullName,
       mobileNumber,
       address,
