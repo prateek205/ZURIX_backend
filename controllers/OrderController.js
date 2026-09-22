@@ -15,6 +15,7 @@ export const createOrder = async (req, res) => {
     if (
       !shippingAddress.fullName ||
       !shippingAddress.mobileNumber ||
+      !shippingAddress.address ||
       !shippingAddress.city ||
       !shippingAddress.state ||
       !shippingAddress.pinCode
