@@ -58,8 +58,8 @@ export const getAllAddress = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Address fetch successfully",
-      data: address,
       count: address.length,
+      data: address,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
