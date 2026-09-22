@@ -19,7 +19,7 @@ export const createAddress = async (req, res) => {
         .json({ success: false, message: "All feilds are mandatory" });
     }
 
-    const newAddress = Address.create({
+    const newAddress = await Address.create({
       user: req.existsUser.user,
       fullName,
       mobileNumber,
@@ -29,8 +29,6 @@ export const createAddress = async (req, res) => {
       country,
       pincode,
     });
-
-    await newAddress.save();
 
     res.status(201).json({
       success: true,
