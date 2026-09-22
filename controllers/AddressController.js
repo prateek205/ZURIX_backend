@@ -43,7 +43,7 @@ export const createAddress = async (req, res) => {
 export const getAllAddress = async (req, res) => {
   try {
     const address = await Address.find({
-      user: existsUser.user,
+      user: req.existsUser.user,
     }).sort({ createdAt: -1 });
 
     if (!data) {
