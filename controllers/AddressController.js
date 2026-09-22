@@ -49,7 +49,7 @@ export const getAllAddress = async (req, res) => {
       user: req.existsUser.user,
     }).sort({ createdAt: -1 });
 
-    if (data) {
+    if (address.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Address not found" });
