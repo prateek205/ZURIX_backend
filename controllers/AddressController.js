@@ -42,7 +42,7 @@ export const createAddress = async (req, res) => {
 
 export const getAllAddress = async (req, res) => {
   try {
-    const data = await Address.find().sort({ createdAt: -1 });
+    const address = await Address.find().sort({ createdAt: -1 });
 
     if (!data) {
       return res
@@ -52,7 +52,12 @@ export const getAllAddress = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, message: "Address fetch successfully", data });
+      .json({
+        success: true,
+        message: "Address fetch successfully",
+        data: address,
+        count: address.length,
+      });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
