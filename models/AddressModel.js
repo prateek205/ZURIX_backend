@@ -46,6 +46,6 @@ const addressSchema = new mongoose.Schema(
   },
 );
 
-const Addresses = mongoose.model("Addresses", addressSchema);
+const Address = mongoose.model("Address", addressSchema);
 
-export default Addresses;
+export default Address;

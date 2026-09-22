@@ -1,4 +1,4 @@
-import { Addresses } from "../models/AddressModel.js";
+import { Address } from "../models/AddressModel.js";
 
 export const createAddress = async (req, res) => {
   try {
@@ -19,7 +19,7 @@ export const createAddress = async (req, res) => {
         .json({ success: false, message: "All feilds are mandatory" });
     }
 
-    const newAddress = Addresses.create({
+    const newAddress = Address.create({
       user: req.user._id,
       fullName,
       mobileNumber,
