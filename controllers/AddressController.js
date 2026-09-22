@@ -42,11 +42,14 @@ export const createAddress = async (req, res) => {
 
 export const getAllAddress = async (req, res) => {
   try {
+
+    console.log("USER:",req.existsUser)
+
     const address = await Address.find({
       user: req.existsUser.user,
     }).sort({ createdAt: -1 });
 
-    if (!data) {
+    if (data) {
       return res
         .status(404)
         .json({ success: false, message: "Address not found" });
