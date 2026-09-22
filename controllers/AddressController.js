@@ -39,3 +39,21 @@ export const createAddress = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
+export const getAllAddress = async (req, res) => {
+  try {
+    const data = await Address.find().sort({ createdAt: -1 });
+
+    if (!data) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Address not found" });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Address fetch successfully", data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
