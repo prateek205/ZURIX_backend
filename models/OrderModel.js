@@ -58,6 +58,10 @@ const OrderSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
+      country:{
+        type:String,
+        required:true,
+      },
       pinCode: {
         type: String,
         trim: true,
