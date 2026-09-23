@@ -18,7 +18,7 @@ export const createOrder = async (req, res) => {
       !shippingAddress.address ||
       !shippingAddress.city ||
       !shippingAddress.state ||
-      !shippingAddress.pinCode ||
+      !shippingAddress.pincode ||
       !shippingAddress.country
     ) {
       return res
