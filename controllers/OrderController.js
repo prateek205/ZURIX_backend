@@ -8,6 +8,13 @@ import Product from "../models/ProductMngmt.js";
 
 export const createOrder = async (req, res) => {
   try {
+
+    console.log("CREATE ORDER API HIT");
+
+    console.log("BODY:", req.body);
+
+    console.log("USER:", req.existsUser);
+
     // bring the value from order model body.
     const { shippingAddress, paymentMethod } = req.body;
 
