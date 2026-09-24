@@ -43,12 +43,12 @@ const OrderSchema = new mongoose.Schema(
       },
       mobileNumber: {
         type: String,
-        min:10,
+        min: 10,
         required: true,
       },
-      address:{
-        type:String,
-        required:true,
+      address: {
+        type: String,
+        required: true,
       },
       city: {
         type: String,
@@ -58,9 +58,9 @@ const OrderSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
-      country:{
-        type:String,
-        required:true,
+      country: {
+        type: String,
+        required: true,
       },
       pinCode: {
         type: String,
@@ -69,8 +69,8 @@ const OrderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["UPI", "COD", "CREDIT-CARD", "DEBIT-CARD"],
-      default: "UPI",
+      enum: ["COD", "ONLINE"],
+      default: "COD",
     },
     paymentStatus: {
       type: String,
@@ -90,6 +90,14 @@ const OrderSchema = new mongoose.Schema(
       ],
       default: "PENDING",
       required: true,
+    },
+    razorpayOrderId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    razorpayPaymentId: {
+      type: String,
     },
     shippingCharges: {
       type: Number,

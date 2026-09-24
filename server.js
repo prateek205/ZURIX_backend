@@ -9,6 +9,7 @@ import CategoryRoute from "./routers/CategoryRoute.js";
 import cartRoute from "./routers/CartRoute.js";
 import orderRoute from "./routers/OrderRoute.js";
 import addressRoute from "./routers/AddressRoute.js"
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use("/api/v1/category", CategoryRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/address",addressRoute);
+app.use("/api/payment", paymentRoutes);
 
 // ===== SERVER LISTENING PORT =====
 
