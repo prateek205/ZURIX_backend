@@ -16,6 +16,7 @@ const addressSchema = new mongoose.Schema(
     mobileNumber: {
       type: String,
       trim: true,
+      min:[10,"max length should be atleast 10 digit"],
       required: true,
     },
     address: {
