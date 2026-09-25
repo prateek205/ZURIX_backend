@@ -145,7 +145,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", SECRET_KEY)
       .update(body)
       .digest("hex");
 
@@ -158,6 +158,18 @@ export const verifyRazorpayPayment = async (req, res) => {
     }
 
     console.log("PAYMENT SIGNATURE VERIFIED");
+
+    const existingOrder = await Order.findOne({
+      razorpayOrderId: razorpay_order_id,
+    });
+
+    if (existingOrder) {
+      return res.status(200).json({
+        success: true,
+        message: "Order already exists",
+        data: existingOrder,
+      });
+    }
 
     // 5. Get user's cart
     const cart = await Cart.findOne({
