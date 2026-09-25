@@ -12,7 +12,6 @@ export const createRazorpayOrder = async (req, res) => {
 
     console.log("USER:", req.existsUser);
 
-    // 1. Find user's cart
     const cart = await Cart.findOne({
       user: req.existsUser.user,
     });
@@ -24,7 +23,6 @@ export const createRazorpayOrder = async (req, res) => {
       });
     }
 
-    // 2. Check cart items
     if (!cart.items || cart.items.length === 0) {
       return res.status(400).json({
         success: false,
@@ -32,13 +30,11 @@ export const createRazorpayOrder = async (req, res) => {
       });
     }
 
-    // 3. Calculate subtotal
     let subtotal = 0;
 
     for (const cartItem of cart.items) {
       const product = await Product.findById(cartItem.productId);
 
-      // Product validation
       if (!product) {
         return res.status(400).json({
           success: false,
@@ -46,7 +42,6 @@ export const createRazorpayOrder = async (req, res) => {
         });
       }
 
-      // Check product active
       if (product.isActive === false) {
         return res.status(400).json({
           success: false,
@@ -54,7 +49,6 @@ export const createRazorpayOrder = async (req, res) => {
         });
       }
 
-      // Check stock
       if (product.stock < cartItem.quantity) {
         return res.status(400).json({
           success: false,
@@ -62,26 +56,21 @@ export const createRazorpayOrder = async (req, res) => {
         });
       }
 
-      // Calculate item price
       const itemTotal = Number(product.salePrice) * Number(cartItem.quantity);
 
       subtotal += itemTotal;
     }
 
-    // 4. Calculate shipping
     const shippingCharges = subtotal >= 1000 ? 0 : 100;
 
-    // 5. Calculate final amount
     const totalAmount = subtotal + shippingCharges;
 
     console.log("SUBTOTAL:", subtotal);
     console.log("SHIPPING:", shippingCharges);
     console.log("TOTAL:", totalAmount);
 
-    // 6. Convert INR to paise
     const razorpayAmount = Math.round(totalAmount * 100);
 
-    // 7. Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
       amount: razorpayAmount,
       currency: "INR",
@@ -93,7 +82,6 @@ export const createRazorpayOrder = async (req, res) => {
 
     console.log("RAZORPAY ORDER:", razorpayOrder);
 
-    // 8. Send response to frontend
     return res.status(200).json({
       success: true,
       message: "Razorpay order created successfully",
@@ -125,7 +113,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       shippingAddress,
     } = req.body;
 
-    // 1. Validate payment details
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({
         success: false,
@@ -133,7 +120,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // 2. Validate shipping address
     if (!shippingAddress) {
       return res.status(400).json({
         success: false,
@@ -141,7 +127,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // 3. Create signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
@@ -149,7 +134,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       .update(body)
       .digest("hex");
 
-    // 4. Compare signatures
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
@@ -171,7 +155,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // 5. Get user's cart
     const cart = await Cart.findOne({
       user: req.existsUser.user,
     });
@@ -190,7 +173,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // 6. Calculate order total from backend
     let subtotal = 0;
 
     for (const cartItem of cart.items) {
@@ -224,7 +206,6 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     const totalAmount = subtotal + shippingCharges;
 
-    // 7. Create MongoDB order
     const newOrder = await Order.create({
       user: req.existsUser.user,
 
@@ -252,7 +233,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       razorpayPaymentId: razorpay_payment_id,
     });
 
-    // 8. Reduce stock
     for (const cartItem of cart.items) {
       await Product.findByIdAndUpdate(cartItem.productId, {
         $inc: {
@@ -261,13 +241,11 @@ export const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    // 9. Clear cart
     cart.items = [];
     await cart.save();
 
     console.log("ONLINE ORDER CREATED:", newOrder._id);
 
-    // 10. Send response
     return res.status(200).json({
       success: true,
       message: "Payment verified and order placed successfully",
