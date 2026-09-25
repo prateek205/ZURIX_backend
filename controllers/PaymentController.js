@@ -1,6 +1,9 @@
 import Cart from "../models/CartModel.js";
 import Product from "../models/ProductMngmt.js";
 import razorpay from "../config/razorpay.js";
+import crypto from "crypto";
+
+const SECRET_KEY = process.env.RAZORPAY_KEY_SECRET;
 
 export const createRazorpayOrder = async (req, res) => {
   try {
@@ -107,5 +110,45 @@ export const createRazorpayOrder = async (req, res) => {
       success: false,
       message: "Failed to create Razorpay order",
     });
+  }
+};
+
+export const verifyRazorpayPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Payment details are required" });
+    }
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", SECRET_KEY)
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid payment signature" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Payment verified successfully",
+      data: {
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+      },
+    });
+  } catch (error) {
+    console.log("PAYMENT_ERROR", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Payment Verification Failed" });
   }
 };
