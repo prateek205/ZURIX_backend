@@ -61,9 +61,9 @@ export const createRazorpayOrder = async (req, res) => {
       subtotal += itemTotal;
     }
 
-    const shippingCharges = subtotal >= 1000 ? 0 : 100;
+    const shippingCharges = sellingPrice >= 1000 ? 0 : 100;
 
-    const totalAmount = subtotal + shippingCharges;
+    const totalAmount = sellingPrice + shippingCharges;
 
     console.log("SUBTOTAL:", subtotal);
     console.log("SHIPPING:", shippingCharges);
