@@ -62,7 +62,7 @@ const OrderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
-      pinCode: {
+      pincode: {
         type: String,
         trim: true,
       },
