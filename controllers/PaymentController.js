@@ -1,5 +1,5 @@
-import Cart from "../models/Cart.js";
-import Product from "../models/Product.js";
+import Cart from "../models/CartModel.js";
+import Product from "../models/ProductMngmt.js";
 import razorpay from "../config/razorpay.js";
 
 export const createRazorpayOrder = async (req, res) => {
