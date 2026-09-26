@@ -15,7 +15,7 @@ export const createWishlist = async (req, res) => {
     const wishList = await Wishlists.findOne({ user: userId });
 
     if (!wishList) {
-      wishList = await Wishlists.create({
+      wishlist = await Wishlists.create({
         user: userId,
         item: [item],
       });
@@ -31,14 +31,14 @@ export const createWishlist = async (req, res) => {
         .json({ success: false, message: "Item already exists" });
     }
 
-    wishList.item.push(item);
+    wishlist.item.push(item);
 
-    await wishList.save();
+    await wishlist.save();
 
     res.status(201).json({
       success: true,
       message: "Item added successfully",
-      data: wishList,
+      data: wishlist,
     });
   } catch (error) {
     console.log("WISHLIST_DATA:", error);
