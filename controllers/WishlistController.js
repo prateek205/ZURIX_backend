@@ -21,8 +21,8 @@ export const createWishlist = async (req, res) => {
       });
     }
 
-    const existsItem = wishlist.item.some((exitsItem) => {
-      return existsItem.productId.toString() == item.productId;
+    const existsItem = wishlist.item.some((existItem) => {
+      return existItem.productId.toString() == item.productId;
     });
 
     if (existsItem) {
