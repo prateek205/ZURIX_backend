@@ -71,7 +71,7 @@ export const getAllWishlist = async (req, res) => {
 
 export const updateWishlist = async (req, res) => {
   try {
-    const { id } = req.params();
+    const { id } = req.params;
 
     const wishlist = await Wishlists.findByIdAndUpdate(id, { new: true });
 
