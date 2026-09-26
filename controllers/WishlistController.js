@@ -15,7 +15,7 @@ export const createWishlist = async (req, res) => {
     let wishlist = await Wishlists.findOne({ user: userId });
 
     if (!wishlist) {
-     const wishlist = await Wishlists.create({
+      const wishlist = await Wishlists.create({
         user: userId,
         item: [item],
       });
@@ -48,6 +48,21 @@ export const createWishlist = async (req, res) => {
     });
   } catch (error) {
     console.log("WISHLIST_DATA:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const getAllWishlist = async (req, res) => {
+  try {
+    const wishlist = await Wishlists.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Data Fetch Successfully",
+      data: wishlist,
+    });
+  } catch (error) {
+    console.log("WISHLIST_ERROR:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
