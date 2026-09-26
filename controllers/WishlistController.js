@@ -15,23 +15,17 @@ export const createWishlist = async (req, res) => {
     const wishList = await Wishlists.findOne({ user: userId });
 
     if (!wishList) {
-      wishlist = await Wishlists.create({
+    wishlist = await Wishlists.create({
         user: userId,
         item: [item],
       });
     }
 
-    res.status(201).json({
-      success: true,
-      message: "Item Added to wishlist",
-      data: wishlist,
-    });
-
     const existsItem = wishlist.item.some((exitsItem) => {
-      existItem.productId.toString() == item.productId;
+     return existsItem.productId.toString() == item.productId;
     });
 
-    if (existItem) {
+    if (existsItem) {
       return res
         .status(404)
         .json({ success: false, message: "Item already exists" });
