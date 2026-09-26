@@ -15,7 +15,7 @@ export const createWishlist = async (req, res) => {
     const wishList = await Wishlists.findOne({ user: userId });
 
     if (!wishList) {
-      wishList = await Wishlists.create({
+      wishlist = await Wishlists.create({
         user: userId,
         item: [item],
       });
