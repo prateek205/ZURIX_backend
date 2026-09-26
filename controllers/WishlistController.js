@@ -59,6 +59,7 @@ export const getAllWishlist = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Data Fetch Successfully",
+      count: wishlist.length,
       data: wishlist,
     });
   } catch (error) {
