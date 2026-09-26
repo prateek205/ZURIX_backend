@@ -71,9 +71,9 @@ export const getAllWishlist = async (req, res) => {
 
 export const updateWishlist = async (req, res) => {
   try {
-    const { id } = useParams();
+    const { id } = req.params();
 
-    const wishlist = await Wishlists.findByIdAndUpdate(id);
+    const wishlist = await Wishlists.findByIdAndUpdate(id, { new: true });
 
     if (wishlist) {
       return res
@@ -81,15 +81,17 @@ export const updateWishlist = async (req, res) => {
         .json({ success: false, message: "Item not found" });
     }
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Item found successfully",
-        data: wishlist,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Item found successfully",
+      data: wishlist,
+    });
   } catch (error) {
     console.log("WISHLIST_ERROR:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error", error:error.message });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
