@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom";
 import Wishlists from "../models/WishlistModel.js";
 
 export const createWishlist = async (req, res) => {
@@ -62,6 +63,31 @@ export const getAllWishlist = async (req, res) => {
       count: wishlist.length,
       data: wishlist,
     });
+  } catch (error) {
+    console.log("WISHLIST_ERROR:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const updateWishlist = async (req, res) => {
+  try {
+    const { id } = useParams();
+
+    const wishlist = await Wishlists.findByIdAndUpdate(id);
+
+    if (wishlist) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
+    }
+
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "Item found successfully",
+        data: wishlist,
+      });
   } catch (error) {
     console.log("WISHLIST_ERROR:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
