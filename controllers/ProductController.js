@@ -100,7 +100,7 @@ export const CreateProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { search, filter, category, maxPrice, minPrice, sort, colors, size } =
+    const { search, filter, Category, maxPrice, minPrice, sort, colors, size } =
       req.query;
 
     const query = {};
@@ -112,8 +112,8 @@ export const getAllProducts = async (req, res) => {
       };
     }
 
-    if (category) {
-      query.category = category;
+    if (Category) {
+      query.Category = Category;
     }
 
     if (colors) {
