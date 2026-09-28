@@ -13,7 +13,9 @@ export const createWishlist = async (req, res) => {
         .json({ success: false, message: "Item is required" });
     }
 
-    let wishlist = await Wishlists.findOne({ user: userId }).populate("item.productId");
+    let wishlist = await Wishlists.findOne({ user: userId }).populate(
+      "item.productId",
+    );
 
     if (!wishlist) {
       const wishlist = await Wishlists.create({
@@ -49,7 +51,9 @@ export const createWishlist = async (req, res) => {
     });
   } catch (error) {
     console.log("WISHLIST_DATA:", error);
-   return res.status(500).json({ success: false, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -81,21 +85,17 @@ export const deleteWishlist = async (req, res) => {
         .json({ success: false, message: "item not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Item deleted successfully",
-        data: wishlist,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Item deleted successfully",
+      data: wishlist,
+    });
   } catch (error) {
     console.log("WISHLIST_ERROR:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
