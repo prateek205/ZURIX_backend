@@ -81,15 +81,10 @@ export const deleteWishlist = async (req, res) => {
     const { id } = req.params;
     const userId = req.existsUser.user;
 
-    console.log("DELETE ID FROM BACKEND:", id);
-    console.log("USER ID:", userId);
-
     const wishlist = await Wishlists.findOne({
       user: userId,
       "item._id": id,
     });
-
-    console.log("WISHLIST FOUND:", wishlist);
 
     if (!wishlist) {
       return res
