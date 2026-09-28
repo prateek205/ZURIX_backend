@@ -56,8 +56,9 @@ export const createWishlist = async (req, res) => {
 };
 
 export const getAllWishlist = async (req, res) => {
+  const userId = req.existsUser.user;
   try {
-    const wishlist = await Wishlists.find()
+    const wishlist = await Wishlists.find({ user: userId })
       .populate("item.productId")
       .sort({ createdAt: -1 });
 
