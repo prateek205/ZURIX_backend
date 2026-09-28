@@ -49,13 +49,11 @@ export const createWishlist = async (req, res) => {
     });
   } catch (error) {
     console.log("WISHLIST_DATA:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -81,14 +79,29 @@ export const getAllWishlist = async (req, res) => {
 export const deleteWishlist = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.existsUser.user;
 
-    const wishlist = await Wishlists.findByIdAndDelete(id);
+    console.log("DELETE ID FROM BACKEND:", id);
+    console.log("USER ID:", userId);
+
+    const wishlist = await Wishlists.findOne({
+      user: userId,
+      "item._id": id,
+    });
+
+    console.log("WISHLIST FOUND:", wishlist);
 
     if (!wishlist) {
       return res
         .status(400)
         .json({ success: false, message: "item not found" });
     }
+
+    wishlist.item = wishlist.item.filter((item) => {
+      return item._id.toString() !== id;
+    });
+
+    await wishlist.save();
 
     res.status(200).json({
       success: true,
