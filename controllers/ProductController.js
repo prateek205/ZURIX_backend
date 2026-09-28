@@ -137,9 +137,9 @@ export const getAllProducts = async (req, res) => {
       }
     }
 
-    const data = await Product.find(query)
-      .sort(sortOption)
-      .populate("category");
+    const sortOption = sort || "-createdAt";
+
+    const data = await Product.find(query).sort(sortOption).populate("category");
     console.log("PRODUCT_DATA:", data);
     res.status(200).json({
       success: true,
