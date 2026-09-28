@@ -100,7 +100,7 @@ export const CreateProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { search, filter, Category, maxPrice, minPrice, sort, colors, size } =
+    const { search, filter, category, maxPrice, minPrice, sort, colors, size } =
       req.query;
 
     const query = {};
@@ -112,8 +112,8 @@ export const getAllProducts = async (req, res) => {
       };
     }
 
-    if (Category) {
-      query.Category = Category;
+    if (category) {
+      query.category = category;
     }
 
     if (colors) {
@@ -140,7 +140,7 @@ export const getAllProducts = async (req, res) => {
 
     const data = await Product.find(query)
       .sort(sortOption)
-      .populate("Category");
+      .populate("category");
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
