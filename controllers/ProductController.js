@@ -141,6 +141,7 @@ export const getAllProducts = async (req, res) => {
     const data = await Product.find(query)
       .sort(sortOption)
       .populate("category");
+    console.log("PRODUCT_DATA:",data)
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
@@ -148,7 +149,7 @@ export const getAllProducts = async (req, res) => {
       data,
     });
   } catch (error) {
-    console.log("GET_PRODUCTS:", error);
+    console.log("GET_PRODUCTS_ERROR:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
