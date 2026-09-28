@@ -137,13 +137,9 @@ export const getAllProducts = async (req, res) => {
       }
     }
 
-    const sortOption = sort || "-createdAt";
-
-    const categories = await Category.findById("6aa13505b3c9c95459802023");
-
-    console.log("CATEGORY FOUND:", categories);
-
-    const data = await Product.find(query).sort(sortOption);
+    const data = await Product.find(query)
+      .sort(sortOption)
+      .populate("category");
     console.log("PRODUCT_DATA:", data);
     res.status(200).json({
       success: true,
