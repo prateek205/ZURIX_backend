@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import Product from "../models/ProductMngmt.js";
+import Category from "../models/CategoryModel.js";
 
 // ==================================
 // CREATE PRODUCT BUSINESS LOGIC
@@ -138,10 +139,12 @@ export const getAllProducts = async (req, res) => {
 
     const sortOption = sort || "-createdAt";
 
-    const data = await Product.find(query)
-      .sort(sortOption)
-      .populate("category");
-    console.log("PRODUCT_DATA:",data)
+    const categories = await Category.findById("6aa13505b3c9c95459802023");
+
+    console.log("CATEGORY FOUND:", categories);
+
+    const data = await Product.find(query).sort(sortOption);
+    console.log("PRODUCT_DATA:", data);
     res.status(200).json({
       success: true,
       message: "Fetch All Product Successfully",
@@ -157,7 +160,7 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await Product.findById(id).populate("category","name");
+    const data = await Product.findById(id).populate("category", "name");
     res
       .status(200)
       .json({ success: true, message: "Product fetch successfully", data });
