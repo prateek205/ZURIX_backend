@@ -53,6 +53,6 @@ const coupenApi = new mongoose.Schema(
   },
 );
 
-const Coupen = mongoose.model("Coupen", coupenApi);
+const Coupens = mongoose.model("Coupens", coupenApi);
 
-export default Coupen;
+export default Coupens;

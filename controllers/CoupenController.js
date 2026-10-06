@@ -1,4 +1,4 @@
-import Coupen from "../models/CoupenModel.js";
+import Coupens from "../models/CoupenModel.js";
 
 export const CreateCoupen = async (req, res) => {
   try {
@@ -60,8 +60,8 @@ export const CreateCoupen = async (req, res) => {
       });
     }
 
-    const existCoupen = await Coupen.findOne({
-      code: code.toUppercase(),
+    const existCoupen = await Coupens.findOne({
+      code: code.toUpperCase(),
     });
 
     if (existCoupen) {
@@ -70,8 +70,8 @@ export const CreateCoupen = async (req, res) => {
         .json({ success: false, message: "coupen code already exists." });
     }
 
-    const coupen = await Coupen.create({
-      code: code.toUppercase(),
+    const coupen = await Coupens.create({
+      code: code.toUpperCase(),
       discountType,
       discountValue: Number(discountValue),
       minOrderAmount: Number(minOrderAmount) || 0,
