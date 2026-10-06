@@ -1,4 +1,4 @@
-import Coupen from "../models/CoupenModel";
+import Coupen from "../models/CoupenModel.js";
 
 export const CreateCoupen = async (req, res) => {
   try {
@@ -91,12 +91,10 @@ export const CreateCoupen = async (req, res) => {
   } catch (error) {
     console.log("COUPEN_CREATE_ERROR:", error);
 
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };

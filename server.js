@@ -11,6 +11,7 @@ import orderRoute from "./routers/OrderRoute.js";
 import addressRoute from "./routers/AddressRoute.js";
 import paymentRoutes from "./routers/PaymentRoute.js";
 import wishlistRoutes from "./routers/WishlistRouter.js";
+import coupenRoute from "./routers/CoupenRoute.js"
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/address", addressRoute);
 app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
+app.use("/api/v1/coupen",coupenRoute);
 
 // ===== SERVER LISTENING PORT =====
 
