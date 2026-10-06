@@ -118,12 +118,10 @@ export const getAllCoupen = async (req, res) => {
   } catch (error) {
     console.log("GET_COUPEN_DATA:", error);
 
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: message.error,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: message.error,
+    });
   }
 };
