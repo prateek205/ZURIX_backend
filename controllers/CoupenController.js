@@ -161,3 +161,115 @@ export const getCoupenByCode = async (req, res) => {
     });
   }
 };
+
+export const applyCoupen = async (req, res) => {
+  try {
+    const { code, subtotal } = req.params;
+
+    if (!code || subtotal === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "coupenCode or subtotal amount is required...",
+      });
+    }
+
+    const orderAmount = Number(subtotal);
+
+    if (orderAmount <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid order amount" });
+    }
+
+    const coupen = await Coupens.findOne({
+      code: code.toUpperCase(),
+    });
+
+    if (!coupen) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Coupen not found" });
+    }
+
+    if (!coupen.isActive) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coupen is not active" });
+    }
+
+    const currentDate = new Date();
+
+    if (currentDate < coupen.startDate) {
+      return res
+        .status(400)
+        .json({ success: false, message: "coupen has not active" });
+    }
+
+    if (currentDate > coupen.expireDate) {
+      return res
+        .status(400)
+        .json({ success: false, message: "coupen has expired" });
+    }
+
+    if (orderAmount < coupen.minOrderAmount) {
+      return res.status(400).json({
+        success: false,
+        message: `minimum order amount should be ${minOrderAmount}`,
+      });
+    }
+
+    if (
+      coupen.usageLimit !== undefined &&
+      coupen.usedCount >= coupen.usageLimit
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: "you have exceed the coupon limit...",
+      });
+    }
+
+    let discountAmount = 0;
+
+    if (coupen.discountType === "PERCENTAGE") {
+      discountAmount = (orderAmount * discountValue) / 100;
+
+      if (
+        coupen.maxDiscount !== undefined &&
+        discountAmount > coupen.maxDiscount
+      ) {
+        discountAmount = coupen.maxDiscount;
+      }
+    }
+
+    if (coupen.discountType === "FIXED") {
+      discountAmount = coupen.discountValue;
+
+      if (discountAmount > orderAmount) {
+        discountAmount = orderAmount;
+      }
+    }
+
+    const finalAmount = orderAmount - discountAmount;
+
+    res.status(200).json({
+      success: true,
+      message: "coupon applied successfully",
+      data: {
+        couponCode: coupen.code,
+        discountType: coupen.discountType,
+        discountValue: coupen.discountValue,
+        discountAmount,
+        subtotal: orderAmount,
+        finalAmount,
+      },
+    });
+  } catch (error) {
+    console.log("APPLY_COUPON_ERROR", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: message.error,
+    });
+  }
+};
