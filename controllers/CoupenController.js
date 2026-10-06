@@ -164,7 +164,7 @@ export const getCoupenByCode = async (req, res) => {
 
 export const applyCoupen = async (req, res) => {
   try {
-    const { code, subtotal } = req.params;
+    const { code, subtotal } = req.body;
 
     if (!code || subtotal === undefined) {
       return res.status(400).json({
@@ -214,7 +214,7 @@ export const applyCoupen = async (req, res) => {
     if (orderAmount < coupen.minOrderAmount) {
       return res.status(400).json({
         success: false,
-        message: `minimum order amount should be ${minOrderAmount}`,
+        message: `minimum order amount should be ${coupen.minOrderAmount}`,
       });
     }
 
@@ -231,7 +231,7 @@ export const applyCoupen = async (req, res) => {
     let discountAmount = 0;
 
     if (coupen.discountType === "PERCENTAGE") {
-      discountAmount = (orderAmount * discountValue) / 100;
+      discountAmount = (orderAmount * coupen.discountValue) / 100;
 
       if (
         coupen.maxDiscount !== undefined &&
