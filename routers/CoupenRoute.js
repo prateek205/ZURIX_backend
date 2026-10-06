@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post("/createCoupen", CreateCoupen);
 router.get("/getAllCoupen", getAllCoupen);
-router.get("/getCoupenByCode", getCoupenByCode)
+router.get("/getCoupenByCode/:code", getCoupenByCode)
 
 export default router;
