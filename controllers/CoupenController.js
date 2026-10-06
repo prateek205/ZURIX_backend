@@ -125,3 +125,39 @@ export const getAllCoupen = async (req, res) => {
     });
   }
 };
+
+export const getCoupenByCode = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    if (!code) {
+      return res
+        .status(404)
+        .json({ success: false, message: "coupen code is required" });
+    }
+
+    const coupen = await Coupens.findOne({
+      code: code.toUpperCase(),
+    });
+
+    if (!coupen) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Coupen not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Coupen fetch successfully!!!",
+      data: coupen,
+    });
+  } catch (error) {
+    console.log("COUPEN_DATA_ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: message.error,
+    });
+  }
+};

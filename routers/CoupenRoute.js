@@ -1,9 +1,10 @@
 import express from "express";
-import { CreateCoupen, getAllCoupen } from "../controllers/CoupenController.js";
+import { CreateCoupen, getAllCoupen, getCoupenByCode } from "../controllers/CoupenController.js";
 
 const router = express.Router();
 
 router.post("/createCoupen", CreateCoupen);
 router.get("/getAllCoupen", getAllCoupen);
+router.get("/getCoupenByCode", getCoupenByCode)
 
 export default router;
