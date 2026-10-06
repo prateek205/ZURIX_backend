@@ -98,3 +98,32 @@ export const CreateCoupen = async (req, res) => {
     });
   }
 };
+
+export const getAllCoupen = async (req, res) => {
+  try {
+    const data = await Coupens.find().sort({ createdAt: -1 });
+
+    if (!data) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coupen not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Coupen fetch successfully",
+      count: data.length,
+      data: data,
+    });
+  } catch (error) {
+    console.log("GET_COUPEN_DATA:", error);
+
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal Server Error",
+        error: message.error,
+      });
+  }
+};
