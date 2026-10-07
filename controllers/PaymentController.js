@@ -3,6 +3,7 @@ import Product from "../models/ProductMngmt.js";
 import razorpay from "../config/razorpay.js";
 import Order from "../models/OrderModel.js";
 import crypto from "crypto";
+import Coupens from "../models/CoupenModel.js";
 
 const SECRET_KEY = process.env.RAZORPAY_KEY_SECRET;
 
@@ -75,7 +76,7 @@ export const createRazorpayOrder = async (req, res) => {
     let appliedCoupon = null;
 
     if (couponCode) {
-      const coupon = await Coupon.findOne({
+      const coupon = await Coupens.findOne({
         code: couponCode.trim().toUpperCase(),
       });
 
