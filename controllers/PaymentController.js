@@ -4,6 +4,7 @@ import razorpay from "../config/razorpay.js";
 import Order from "../models/OrderModel.js";
 import crypto from "crypto";
 import Coupens from "../models/CoupenModel.js";
+import roundPrice from "../helper/roundPrice.js";
 
 const SECRET_KEY = process.env.RAZORPAY_KEY_SECRET;
 
@@ -137,7 +138,7 @@ export const createRazorpayOrder = async (req, res) => {
       // --------------------------------
 
       if (coupon.discountType === "PERCENTAGE") {
-        discountAmount = (subtotal * coupon.discountValue) / 100;
+        discountAmount = roundPrice(subtotal * coupon.discountValue) / 100;
 
         if (
           coupon.maximumDiscount !== undefined &&
@@ -151,7 +152,7 @@ export const createRazorpayOrder = async (req, res) => {
         discountAmount = coupon.discountValue;
 
         if (discountAmount > subtotal) {
-          discountAmount = subtotal;
+          discountAmount = roundPrice(subtotal);
         }
       }
 
@@ -168,7 +169,7 @@ export const createRazorpayOrder = async (req, res) => {
     // 4. Calculate final amount
     // --------------------------------
 
-    const totalAmount = subtotal - discountAmount + shippingCharges;
+    const totalAmount = roundPrice(subtotal - discountAmount + shippingCharges);
 
     console.log("SUBTOTAL:", subtotal);
     console.log("DISCOUNT:", discountAmount);
@@ -349,7 +350,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 
       const itemTotal = Number(product.salePrice) * Number(cartItem.quantity);
 
-      subtotal += itemTotal;
+      subtotal = roundPrice(itemTotal);
     }
 
     // --------------------------------
@@ -421,7 +422,7 @@ export const verifyRazorpayPayment = async (req, res) => {
       // --------------------------------
 
       if (coupon.discountType === "PERCENTAGE") {
-        discountAmount = (subtotal * coupon.discountValue) / 100;
+        discountAmount = roundPrice(subtotal * coupon.discountValue) / 100;
 
         if (
           coupon.maximumDiscount !== undefined &&
@@ -435,7 +436,7 @@ export const verifyRazorpayPayment = async (req, res) => {
         discountAmount = coupon.discountValue;
 
         if (discountAmount > subtotal) {
-          discountAmount = subtotal;
+          discountAmount = roundPrice(subtotal);
         }
       }
 
@@ -452,7 +453,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     // 9. Calculate final amount
     // --------------------------------
 
-    const totalAmount = subtotal - discountAmount + shippingCharges;
+    const totalAmount = roundPrice(subtotal - discountAmount + shippingCharges);
 
     console.log("SUBTOTAL:", subtotal);
     console.log("COUPON:", appliedCoupon?.code || null);
