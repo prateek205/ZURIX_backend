@@ -273,3 +273,76 @@ export const applyCoupen = async (req, res) => {
     });
   }
 };
+
+export const updateCoupon = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      code,
+      discountType,
+      discountValue,
+      minOrderAmount,
+      maxDiscount,
+      startDate,
+      expireDate,
+      usageLimit,
+    } = req.body;
+
+    const coupon = await Coupons.findById(id);
+
+    if (!coupon) {
+      return res
+        .status(404)
+        .json({ success: false, message: "coupon not found" });
+    }
+
+    if (discountType && !["PERCENTAGE", "FIXED"].includes(discountType)) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid discount type" });
+    }
+
+    if (discountType === "PERCENTAGE" && Number(discountValue) > 100) {
+      return res.status(404).json({
+        success: false,
+        message: "discount value cannot be exceed more then 100%",
+      });
+    }
+
+    if (discountValue !== undefined && Number(discountValue) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "discount value must be greater then 0",
+      });
+    }
+
+    if ((startDate, expireDate)) {
+      const start = new Date(startDate);
+      const expire = new Date(expireDate);
+
+      if (expire <= start) {
+        return res.status(400).json({
+          success: false,
+          message: "expiry date must be after start date",
+        });
+      }
+    }
+
+    if (code) {
+      const existCoupon = await Coupens.findOne({
+        code: code.toUpperCase(),
+        _id: { $in: id },
+      });
+
+      if (existCoupon) {
+        return res
+          .status(409)
+          .json({ success: false, message: "coupon is already exists" });
+      }
+    }
+
+    coupon.code = code ? code.toUpperCase() : coupon.code;
+
+  } catch (error) {}
+};
