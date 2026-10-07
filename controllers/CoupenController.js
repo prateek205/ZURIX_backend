@@ -1,3 +1,4 @@
+import { data } from "react-router-dom";
 import Coupens from "../models/CoupenModel.js";
 
 export const CreateCoupen = async (req, res) => {
@@ -344,5 +345,53 @@ export const updateCoupon = async (req, res) => {
 
     coupon.code = code ? code.toUpperCase() : coupon.code;
 
-  } catch (error) {}
+    coupon.discountType = discountType || coupon.discountType;
+
+    coupon.discountValue =
+      discountValue !== undefined
+        ? Number(discountValue)
+        : coupon.discountValue;
+
+    coupon.minOrderAmount =
+      minOrderAmount !== undefined
+        ? Number(minOrderAmount)
+        : coupon.minOrderAmount;
+
+    coupon.maxDiscount =
+      maxDiscount !== undefined ? Number(maxDiscount) : coupon.maxDiscount;
+
+    coupon.startDate = startDate || coupon.startDate;
+
+    coupon.expireDate = expireDate || coupon.expireDate;
+
+    coupon.usageLimit =
+      usageLimit !== undefined ? Number(usageLimit) : usageLimit;
+
+    coupon.isActive = isActive !== undefined ? isActive : coupon.isActive;
+
+    await coupon.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Coupon update successfully!!!",
+      data: coupon,
+    });
+  } catch (error) {
+    console.log("UPDATE_COUPON_ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: message.error,
+    });
+  }
 };
+
+export const deleteCoupon = async (req,res) => {
+  try {
+    const {id} = req.params;
+
+  } catch (error) {
+    
+  }
+}
