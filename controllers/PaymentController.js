@@ -8,8 +8,10 @@ const SECRET_KEY = process.env.RAZORPAY_KEY_SECRET;
 
 export const createRazorpayOrder = async (req, res) => {
   try {
-    console.log("RAZORPAY CREATE ORDER API HIT");
+    const { couponCode } = req.body;
 
+    console.log("RAZORPAY CREATE ORDER API HIT");
+    console.log("COUPON CODE:", couponCode);
     console.log("USER:", req.existsUser);
 
     const cart = await Cart.findOne({
@@ -29,6 +31,10 @@ export const createRazorpayOrder = async (req, res) => {
         message: "Cart is empty",
       });
     }
+
+    // --------------------------------
+    // 1. Calculate cart subtotal
+    // --------------------------------
 
     let subtotal = 0;
 
@@ -61,15 +67,122 @@ export const createRazorpayOrder = async (req, res) => {
       subtotal += itemTotal;
     }
 
+    // --------------------------------
+    // 2. Calculate coupon discount
+    // --------------------------------
+
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode.trim().toUpperCase(),
+      });
+
+      if (!coupon) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupon not found",
+        });
+      }
+
+      // Check active status
+      if (!coupon.isActive) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupon is not active",
+        });
+      }
+
+      // Check start date
+      const currentDate = new Date();
+
+      if (currentDate < coupon.startDate) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupon is not active yet",
+        });
+      }
+
+      // Check expiry
+      if (currentDate > coupon.expiryDate) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupon has expired",
+        });
+      }
+
+      // Check minimum order amount
+      if (subtotal < coupon.minimumOrderAmount) {
+        return res.status(400).json({
+          success: false,
+          message: `Minimum order amount should be ₹${coupon.minimumOrderAmount}`,
+        });
+      }
+
+      // Check usage limit
+      if (
+        coupon.usageLimit !== undefined &&
+        coupon.usedCount >= coupon.usageLimit
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupon usage limit has been reached",
+        });
+      }
+
+      // --------------------------------
+      // Calculate discount
+      // --------------------------------
+
+      if (coupon.discountType === "PERCENTAGE") {
+        discountAmount = (subtotal * coupon.discountValue) / 100;
+
+        if (
+          coupon.maximumDiscount !== undefined &&
+          discountAmount > coupon.maximumDiscount
+        ) {
+          discountAmount = coupon.maximumDiscount;
+        }
+      }
+
+      if (coupon.discountType === "FIXED") {
+        discountAmount = coupon.discountValue;
+
+        if (discountAmount > subtotal) {
+          discountAmount = subtotal;
+        }
+      }
+
+      appliedCoupon = coupon;
+    }
+
+    // --------------------------------
+    // 3. Calculate shipping
+    // --------------------------------
+
     const shippingCharges = subtotal >= 1000 ? 0 : 100;
 
-    const totalAmount = subtotal + shippingCharges;
+    // --------------------------------
+    // 4. Calculate final amount
+    // --------------------------------
+
+    const totalAmount = subtotal - discountAmount + shippingCharges;
 
     console.log("SUBTOTAL:", subtotal);
+    console.log("DISCOUNT:", discountAmount);
     console.log("SHIPPING:", shippingCharges);
-    console.log("TOTAL:", totalAmount);
+    console.log("FINAL TOTAL:", totalAmount);
+
+    // --------------------------------
+    // 5. Convert INR to paise
+    // --------------------------------
 
     const razorpayAmount = Math.round(totalAmount * 100);
+
+    // --------------------------------
+    // 6. Create Razorpay order
+    // --------------------------------
 
     const razorpayOrder = await razorpay.orders.create({
       amount: razorpayAmount,
@@ -77,6 +190,8 @@ export const createRazorpayOrder = async (req, res) => {
       receipt: `receipt_${Date.now()}`,
       notes: {
         userId: req.existsUser.user.toString(),
+        couponCode: appliedCoupon?.code || "",
+        discountAmount: discountAmount.toString(),
       },
     });
 
@@ -89,7 +204,13 @@ export const createRazorpayOrder = async (req, res) => {
         razorpayOrderId: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
+
+        subtotal,
+        discountAmount,
+        shippingCharges,
         totalAmount,
+
+        couponCode: appliedCoupon?.code || null,
       },
     });
   } catch (error) {
