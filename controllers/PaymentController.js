@@ -219,6 +219,7 @@ export const createRazorpayOrder = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create Razorpay order",
+      error:error.message
     });
   }
 };
