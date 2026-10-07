@@ -288,7 +288,7 @@ export const updateCoupon = async (req, res) => {
       startDate,
       expireDate,
       usageLimit,
-      isActive
+      isActive,
     } = req.body;
 
     const coupon = await Coupens.findById(id);
@@ -388,11 +388,30 @@ export const updateCoupon = async (req, res) => {
   }
 };
 
-export const deleteCoupon = async (req,res) => {
+export const deleteCoupon = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
+    const coupon = await Coupens.findByIdAndDelete(id);
+
+    if (!coupon) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Coupen not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Coupon deleted successfully",
+      data: coupon,
+    });
   } catch (error) {
-    
+    console.log("COUPON_DELETED_ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
-}
+};
