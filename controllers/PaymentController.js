@@ -500,7 +500,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     // --------------------------------
 
     if (appliedCoupon) {
-      await Coupon.findByIdAndUpdate(appliedCoupon._id, {
+      await Coupens.findByIdAndUpdate(appliedCoupon._id, {
         $inc: {
           usedCount: 1,
         },
