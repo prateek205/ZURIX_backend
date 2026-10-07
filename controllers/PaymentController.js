@@ -544,6 +544,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Payment verification failed",
+      error:error.message
     });
   }
 };
