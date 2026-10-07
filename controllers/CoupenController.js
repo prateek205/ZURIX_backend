@@ -122,7 +122,7 @@ export const getAllCoupen = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: message.error,
+      error: error.message,
     });
   }
 };
@@ -158,7 +158,7 @@ export const getCoupenByCode = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: message.error,
+      error: error.message,
     });
   }
 };
@@ -270,7 +270,7 @@ export const applyCoupen = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: message.error,
+      error: error.message,
     });
   }
 };
@@ -288,9 +288,10 @@ export const updateCoupon = async (req, res) => {
       startDate,
       expireDate,
       usageLimit,
+      isActive
     } = req.body;
 
-    const coupon = await Coupons.findById(id);
+    const coupon = await Coupens.findById(id);
 
     if (!coupon) {
       return res
@@ -382,7 +383,7 @@ export const updateCoupon = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: message.error,
+      error: error.message,
     });
   }
 };
