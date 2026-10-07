@@ -360,7 +360,7 @@ export const verifyRazorpayPayment = async (req, res) => {
     let appliedCoupon = null;
 
     if (couponCode) {
-      const coupon = await Coupon.findOne({
+      const coupon = await Coupens.findOne({
         code: couponCode.trim().toUpperCase(),
       });
 
