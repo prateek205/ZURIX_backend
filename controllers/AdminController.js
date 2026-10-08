@@ -129,3 +129,24 @@ export const getAdminProfile = async (req, res) => {
     });
   }
 };
+
+export const adminLogout = async (req, res) => {
+  try {
+    res.clearCookie("adminToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Admin Logout Successfully!!!" });
+  } catch (error) {
+    console.log("ADMIN_LOGOUT_ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
