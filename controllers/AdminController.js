@@ -14,7 +14,9 @@ export const adminLogin = async (req, res) => {
         .json({ success: false, message: "All feilds are required...." });
     }
 
-    const admin = await Admin.findOne({ email });
+    const admin = await Admin.findOne({ email:email });
+
+    console.log("ADMIN_FOUND:",admin)
 
     if (!admin) {
       return res
@@ -39,19 +41,24 @@ export const adminLogin = async (req, res) => {
     const token = jwt.sign(
       { adminId: admin._id, role: admin.role },
       ADMIN_TOKEN,
-      { expireIn: "1d" },
+      { expiresIn: "1d" },
     );
 
     res.cookie("adminToken", token, {
       httpOnly: true,
       secure: true,
-      samsSite: "none",
+      sameSite: "none",
     });
 
     res.status(200).json({
       success: true,
       message: "Admin login successfully!!!",
-      data: admin,
+      data: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
     });
   } catch (error) {
     console.log("ADMIN_LOGIN_ERROR:", error);
