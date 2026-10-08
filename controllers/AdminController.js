@@ -1,6 +1,10 @@
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import Admin from "../models/AdminModel.js";
 
 export const adminLogin = async (req, res) => {
+  const ADMIN_TOKEN = process.env.ADMIN_JWT_SECRET;
+
   try {
     const { email, password } = req.body;
 
@@ -18,7 +22,33 @@ export const adminLogin = async (req, res) => {
         .json({ success: false, message: "Admin not found" });
     }
 
-    res.status(201).json({
+    if (!admin.isActive) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Admin is not active" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isPasswordMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password does not match" });
+    }
+
+    const token = jwt.sign(
+      { adminId: admin._id, role: admin.role },
+      ADMIN_TOKEN,
+      { expireIn: "1d" },
+    );
+
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: true,
+      samsSite: "none",
+    });
+
+    res.status(200).json({
       success: true,
       message: "Admin login successfully!!!",
       data: admin,
