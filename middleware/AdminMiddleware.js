@@ -34,12 +34,10 @@ export const adminProtectedRoute = async (req, res, next) => {
   } catch (error) {
     console.log("ADMIN_ERROR:", error);
 
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
