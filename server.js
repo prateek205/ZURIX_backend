@@ -12,6 +12,7 @@ import addressRoute from "./routers/AddressRoute.js";
 import paymentRoutes from "./routers/PaymentRoute.js";
 import wishlistRoutes from "./routers/WishlistRouter.js";
 import coupenRoute from "./routers/CoupenRoute.js"
+import adminRoute from "./routers/AdminRoute.js"
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use(
 
 // ===== ROUTES =====
 
+// ===== CLIENT SIDE =====
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/products", ProductRoute);
 app.use("/api/v1/category", CategoryRoute);
@@ -50,6 +52,9 @@ app.use("/api/v1/address", addressRoute);
 app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/coupen",coupenRoute);
+
+// ===== ADMIN SIDE =====
+app.use("/api/v1/admin", adminRoute);
 
 // ===== SERVER LISTENING PORT =====
 
