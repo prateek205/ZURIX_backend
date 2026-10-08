@@ -2,6 +2,55 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Admin from "../models/AdminModel.js";
 
+export const adminRegister = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res
+        .status(404)
+        .json({ success: false, message: "All feilds are mandatory" });
+    }
+
+    const existAdmin = await Admin.findOne({ email });
+
+    if (existAdmin) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Admin already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (hashedPassword !== password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password doesn't match" });
+    }
+
+    const admin = await Admin.create({
+      name: admin.name,
+      email: admin.email,
+      password: hashedPassword,
+      role: "ADMIN",
+      isActive: true,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Admin created Successfully!!!",
+      data: admin,
+    });
+  } catch (error) {
+    console.log("ADMIN_CREATED_ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
 export const adminLogin = async (req, res) => {
   const ADMIN_TOKEN = process.env.ADMIN_JWT_SECRET;
 
@@ -14,9 +63,9 @@ export const adminLogin = async (req, res) => {
         .json({ success: false, message: "All feilds are required...." });
     }
 
-    const admin = await Admin.findOne({ email:email });
+    const admin = await Admin.findOne({ email: email });
 
-    console.log("ADMIN_FOUND:",admin)
+    console.log("ADMIN_FOUND:", admin);
 
     if (!admin) {
       return res
