@@ -32,3 +32,20 @@ export const adminLogin = async (req, res) => {
     });
   }
 };
+
+export const getAdminProfile = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: "Profile get successfully!!!",
+      data: req.admin,
+    });
+  } catch (error) {
+    console.log("GET_PROFILE_ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
