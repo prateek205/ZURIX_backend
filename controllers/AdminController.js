@@ -22,15 +22,9 @@ export const adminRegister = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (hashedPassword !== password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Password doesn't match" });
-    }
-
     const admin = await Admin.create({
-      name: admin.name,
-      email: admin.email,
+      name: name,
+      email: email,
       password: hashedPassword,
       role: "ADMIN",
       isActive: true,

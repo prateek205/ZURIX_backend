@@ -4,7 +4,7 @@ import { adminProtectedRoute } from "../middleware/AdminMiddleware.js";
 
 const router = express.Router();
 
-router.post("/createAdmin", adminRegister)
+router.post("/registerAdmin", adminRegister)
 router.post("/adminLogin", adminLogin);
 router.get("/getAdminProfile", adminProtectedRoute, getAdminProfile);
 
