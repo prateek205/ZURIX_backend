@@ -22,9 +22,6 @@ const PORT = process.env.SERVER_PORT || 5000;
 const CLIENT = process.env.FRONT_END_URL;
 const ADMIN = process.env.ADMIN_PANEL_URL;
 
-console.log("FRONT_END_URL:", process.env.FRONT_END_URL);
-console.log("CLIENT:", CLIENT);
-
 // ===== MONGODB CONNECTION =====
 
 connectdb();
