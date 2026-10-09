@@ -46,7 +46,7 @@ export const adminRegister = async (req, res) => {
 };
 
 export const adminLogin = async (req, res) => {
-  const ADMIN_TOKEN = process.env.ADMIN_JWT_SECRET;
+  const ADMIN_SECRET_KEY = process.env.ADMIN_JWT_SECRET;
 
   try {
     const { email, password } = req.body;
@@ -83,7 +83,7 @@ export const adminLogin = async (req, res) => {
 
     const token = jwt.sign(
       { adminId: admin._id, role: admin.role },
-      ADMIN_TOKEN,
+      ADMIN_SECRET_KEY,
       { expiresIn: "1d" },
     );
 
