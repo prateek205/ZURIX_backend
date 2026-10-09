@@ -4,6 +4,7 @@ import {
   createOrder,
   getAllOrder,
   getOrderById,
+  getOrders,
 } from "../controllers/OrderController.js";
 import { protectedRoute } from "../middleware/AuthMiddleware.js";
 import { adminProtectedRoute } from "../middleware/AdminMiddleware.js";
@@ -16,6 +17,6 @@ router.get("/getOrderById/:id", protectedRoute, getOrderById);
 router.delete("/cancelOrder/:id", protectedRoute, cancelOrder);
 
 // ADMIN SIDE ORDERS
-router.get("/get-Orders", adminProtectedRoute, getAllOrder);
+router.get("/get-Orders", adminProtectedRoute, getOrders);
 
 export default router;

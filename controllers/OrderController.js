@@ -167,13 +167,11 @@ export const getAllOrder = async (req, res) => {
   } catch (error) {
     // check the error if data is not coming.
     console.log("ALL_ORDER_DATA:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
@@ -263,5 +261,27 @@ export const cancelOrder = async (req, res) => {
     // check the error for order cancel.
     console.log("ORDER_CAN:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// ADMIN GET-ALL-ORDERS
+
+export const getOrders = async (req, res) => {
+  try {
+    const order = await Order.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Fetch All Order Successfully!!!",
+      count: order.length,
+      order,
+    });
+  } catch (error) {
+    console.log("ORDER_ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
