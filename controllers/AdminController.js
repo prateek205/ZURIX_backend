@@ -118,7 +118,12 @@ export const getAdminProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Profile get successfully!!!",
-      data: req.admin,
+      data: {
+        adminId: req.admin._id,
+        name: req.admin.name,
+        email: req.admin.email,
+        role: req.admin.role,
+      },
     });
   } catch (error) {
     console.log("GET_PROFILE_ERROR:", error);
