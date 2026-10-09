@@ -8,7 +8,6 @@ import Product from "../models/ProductMngmt.js";
 
 export const createOrder = async (req, res) => {
   try {
-
     console.log("CREATE ORDER API HIT");
 
     console.log("BODY:", req.body);
@@ -168,7 +167,13 @@ export const getAllOrder = async (req, res) => {
   } catch (error) {
     // check the error if data is not coming.
     console.log("ALL_ORDER_DATA:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Internal Server Error",
+        error: error.message,
+      });
   }
 };
 
