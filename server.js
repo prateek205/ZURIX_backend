@@ -33,8 +33,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [CLIENT, "http://localhost:5173"],
-    origin: [ADMIN, "http://localhost:5174"],
+    origin: [CLIENT, "http://localhost:5173", ADMIN, "http://localhost:5174"],
     credentials: true,
   }),
 );
