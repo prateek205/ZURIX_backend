@@ -11,8 +11,8 @@ import orderRoute from "./routers/OrderRoute.js";
 import addressRoute from "./routers/AddressRoute.js";
 import paymentRoutes from "./routers/PaymentRoute.js";
 import wishlistRoutes from "./routers/WishlistRouter.js";
-import coupenRoute from "./routers/CoupenRoute.js"
-import adminRoute from "./routers/AdminRoute.js"
+import coupenRoute from "./routers/CoupenRoute.js";
+import adminRoute from "./routers/AdminRoute.js";
 
 dotenv.config();
 
@@ -20,6 +20,7 @@ dotenv.config();
 
 const PORT = process.env.SERVER_PORT || 5000;
 const CLIENT = process.env.FRONT_END_URL;
+const ADMIN = process.env.ADMIN_PANEL_URL;
 
 console.log("FRONT_END_URL:", process.env.FRONT_END_URL);
 console.log("CLIENT:", CLIENT);
@@ -36,7 +37,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [CLIENT, "http://localhost:5173"],
-    origin:"http://localhost:5174",
+    origin: [ADMIN, "http://localhost:5174"],
     credentials: true,
   }),
 );
@@ -52,7 +53,7 @@ app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/address", addressRoute);
 app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
-app.use("/api/v1/coupen",coupenRoute);
+app.use("/api/v1/coupen", coupenRoute);
 
 // ===== ADMIN SIDE =====
 app.use("/api/v1/admin", adminRoute);
