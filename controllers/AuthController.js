@@ -100,14 +100,12 @@ export const login = async (req, res) => {
 
     // ========== Response for user side ==========
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Login Successfull",
-        user: existsUser,
-        token: token,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Login Successfull",
+      user: existsUser,
+      token: token,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -120,10 +118,9 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
+    const userId = req.existsUser.user;
 
-    const userId = req.existsUser.user
-
-    console.log("USERID:", userId)
+    console.log("USERID:", userId);
 
     // ========== Get profile data ==========
     const profile = await Auths.findById(userId).select("-password");
@@ -166,5 +163,31 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+// =======*************=======
+// GET ALL CUSTOMER LOGIC
+// =======*************=======
+export const getAllCustomers = async (req, res) => {
+  try {
+    const customers = await Auths.find()
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      message: "Customers fetched successfully",
+      count: customers.length,
+      data: customers,
+    });
+  } catch (error) {
+    console.error("GET ALL CUSTOMERS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
