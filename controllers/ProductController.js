@@ -8,8 +8,7 @@ import Category from "../models/CategoryModel.js";
 
 export const CreateProduct = async (req, res) => {
   try {
-    // ********** stored the feilds from body which is create in the models **********
-
+    // Get product fields from request body
     const {
       name,
       description,
@@ -23,47 +22,48 @@ export const CreateProduct = async (req, res) => {
       isActive,
     } = req.body;
 
-    // ********** Validation for required feilds **********
-
+    // Validate required fields
     if (
       !name ||
       !description ||
       !category ||
       price == null ||
       salePrice == null ||
-      !size ||
-      !colors ||
+      size == null ||
+      colors == null ||
       stock == null
     ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All feilds are mandatory..." });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are mandatory",
+      });
     }
 
-    // *************** validate the image upload or not ***********
+    // Validate image upload
     if (!req.files || req.files.length === 0) {
-      res
-        .status(400)
-        .json({ success: false, message: "Atleast one image is required" });
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required",
+      });
     }
 
-    // ********** Validation for product exists or not **********
-
+    // Check whether the product already exists
     const productExists = await Product.findOne({ name });
+
     if (productExists) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product Already Exists" });
+      return res.status(409).json({
+        success: false,
+        message: "Product already exists",
+      });
     }
 
-    // ************ unpload image to cloudinary **************
+    // Prepare Cloudinary image details
     const images = req.files.map((file) => ({
       url: file.path,
       publicId: file.filename,
     }));
 
-    // ********** stored all feilds in one variables **********
-
+    // Prepare product data
     const productData = {
       name,
       description,
@@ -74,28 +74,27 @@ export const CreateProduct = async (req, res) => {
       colors,
       stock,
       images,
-      isFeatured,
-      isActive: true,
+      isFeatured: isFeatured ?? false,
+      isActive: isActive ?? true,
     };
 
-    const newProduct = new Product(productData);
+    // Create and save product
+    const newProduct = await Product.create(productData);
 
-    // ********** save the product to Databased **********
-
-    await newProduct.save();
-
-    // ********** send response to cleint side **********
-
-    res.status(201).json({
+    // Send success response
+    return res.status(201).json({
       success: true,
-      message: "Product Create Successfully!!!",
+      message: "Product created successfully",
       data: newProduct,
     });
   } catch (error) {
-    // ********** check the error if above response is failed **********
+    console.error("CREATE PRODUCT ERROR:", error);
+    console.error("ERROR MESSAGE:", error.message);
 
-    console.log("PRODUCT_DATA:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error", error:error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
 };
 
