@@ -9,7 +9,7 @@ const categoryModel = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["mens", "womens", "kids","unisex"],
+      enum: ["mens", "womens","unisex"],
       required: true,
     },
     image: {
