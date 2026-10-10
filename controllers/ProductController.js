@@ -75,7 +75,7 @@ export const CreateProduct = async (req, res) => {
       stock,
       images,
       isFeatured,
-      isActive : true,
+      isActive: true,
     };
 
     const newProduct = new Product(productData);
@@ -125,21 +125,42 @@ export const getAllProducts = async (req, res) => {
       query.size = size;
     }
 
-    if ((minPrice, maxPrice)) {
+    // Price Filter
+    if (minPrice || maxPrice) {
       query.price = {};
 
-      if (minPrice) {
+      if (minPrice !== undefined && minPrice !== "") {
         query.price.$gte = Number(minPrice);
       }
 
-      if (maxPrice) {
+      if (maxPrice !== undefined && maxPrice !== "") {
         query.price.$lte = Number(maxPrice);
       }
     }
 
-    const sortOption = sort || "-createdAt";
+    // Sorting
+    let sortOption = {};
 
-    const data = await Product.find(query).sort(sortOption).populate("category");
+    switch (sort) {
+      case "newest":
+        sortOption = { createdAt: -1 };
+        break;
+
+      case "minPrice":
+        sortOption = { price: 1 };
+        break;
+
+      case "maxPrice":
+        sortOption = { price: -1 };
+        break;
+
+      default:
+        sortOption = { createdAt: -1 };
+    }
+
+    const data = await Product.find(query)
+      .sort(sortOption)
+      .populate("category");
     console.log("PRODUCT_DATA:", data);
     res.status(200).json({
       success: true,
