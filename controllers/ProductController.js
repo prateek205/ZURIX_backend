@@ -95,7 +95,7 @@ export const CreateProduct = async (req, res) => {
     // ********** check the error if above response is failed **********
 
     console.log("PRODUCT_DATA:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error", error:error.message });
   }
 };
 
