@@ -75,7 +75,7 @@ export const CreateProduct = async (req, res) => {
       stock,
       images,
       isFeatured,
-      isActive,
+      isActive : true,
     };
 
     const newProduct = new Product(productData);
