@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Admin from "../models/AdminModel.js";
+import crypto from "node:crypto";
+import { sendEmail } from "../utils/mailer.js";
 
 export const adminRegister = async (req, res) => {
   try {
