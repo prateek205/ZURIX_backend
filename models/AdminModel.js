@@ -8,12 +8,15 @@ const adminSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
-      min: [8, "password must be aleast 8 characters"],
+      min: [8, "Password must be at least 8 characters"],
     },
     role: {
       type: String,
@@ -23,6 +26,16 @@ const adminSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: undefined,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: undefined,
+      select: false,
     },
   },
   {

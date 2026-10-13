@@ -155,3 +155,148 @@ export const adminLogout = async (req, res) => {
     });
   }
 };
+
+export const adminForgotPassword = async (req, res) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const admin = await Admin.findOne({
+      email,
+      isActive: true,
+    });
+
+    const message =
+      "If an active admin account exists for this email, a reset link will be sent.";
+
+    if (!admin) {
+      return res.status(200).json({
+        success: true,
+        message,
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    admin.resetPasswordToken = hashedToken;
+    admin.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await admin.save();
+
+    const resetLink =
+      `${process.env.ADMIN_FRONTEND_URL}/reset-password` +
+      `?token=${resetToken}`;
+
+    try {
+      await sendEmail({
+        to: admin.email,
+        subject: "Admin Password Reset",
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Reset Your Admin Password</h2>
+            <p>Hello ${admin.name},</p>
+            <p>We received a request to reset your admin password.</p>
+            <p>This link expires in 15 minutes and can only be used once.</p>
+            <a
+              href="${resetLink}"
+              style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;border-radius:6px;"
+            >
+              Reset Password
+            </a>
+            <p>If you did not request this, you can ignore this email.</p>
+          </div>
+        `,
+      });
+    } catch (emailError) {
+      admin.resetPasswordToken = undefined;
+      admin.resetPasswordExpires = undefined;
+      await admin.save();
+
+      throw emailError;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message,
+    });
+  } catch (error) {
+    console.error("ADMIN_FORGOT_PASSWORD_ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to process the password reset request",
+    });
+  }
+};
+
+export const adminResetPassword = async (req, res) => {
+  try {
+    const { token, password, confirmPassword } = req.body;
+
+    if (!token || !password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const admin = await Admin.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() },
+      isActive: true,
+    }).select("+resetPasswordToken +resetPasswordExpires");
+
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset link is invalid or has expired",
+      });
+    }
+
+    admin.password = await bcrypt.hash(password, 10);
+
+    admin.set("resetPasswordToken", undefined);
+    admin.set("resetPasswordExpires", undefined);
+
+    await admin.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin password reset successfully. Please log in.",
+    });
+  } catch (error) {
+    console.error("ADMIN_RESET_PASSWORD_ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to reset password",
+    });
+  }
+};
