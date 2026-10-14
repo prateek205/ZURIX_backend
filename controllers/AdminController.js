@@ -197,7 +197,7 @@ export const adminForgotPassword = async (req, res) => {
     await admin.save();
 
     const resetLink =
-      `${process.env.ADMIN_FRONTEND_URL}/reset-password` +
+      `${process.env.ADMIN_PANEL_URL}/reset-password` +
       `?token=${resetToken}`;
 
     try {
