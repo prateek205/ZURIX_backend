@@ -1,5 +1,30 @@
 import mongoose from "mongoose";
 
+// Stock for one specific color-size combination
+const variantSchema = new mongoose.Schema(
+  {
+    color: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    size: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    stock: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+  },
+  {
+    _id: true,
+  },
+);
+
 const ProductSchema = new mongoose.Schema(
   {
     name: {
@@ -35,6 +60,10 @@ const ProductSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    variants: {
+      type: [variantSchema],
+      default: [],
+    },
     images: [
       {
         url: {
@@ -49,8 +78,8 @@ const ProductSchema = new mongoose.Schema(
     ],
     stock: {
       type: Number,
-      default: 10,
-      min: 10,
+      default: 0,
+      min: 0,
     },
     isFeatured: {
       type: Boolean,

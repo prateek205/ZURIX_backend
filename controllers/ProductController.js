@@ -2,44 +2,111 @@ import { useParams } from "react-router-dom";
 import Product from "../models/ProductMngmt.js";
 import Category from "../models/CategoryModel.js";
 
+const parseArrayField = (value, fieldName) => {
+  if (Array.isArray(value)) return value;
+
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`${fieldName} must be an array`);
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      throw new Error(`${fieldName} must be an array`);
+    }
+    return parsed;
+  } catch {
+    throw new Error(`${fieldName} must be a valid JSON array`);
+  }
+};
+
+const normalizeVariants = (value) => {
+  const variants = parseArrayField(value, "variants");
+  const seen = new Set();
+
+  if (variants.length === 0) {
+    throw new Error("At least one color-size variant is required");
+  }
+
+  return variants.map((variant) => {
+    const color = String(variant?.color || "").trim();
+    const size = String(variant?.size || "").trim();
+    const stock = Number(variant?.stock);
+
+    if (!color || !size) {
+      throw new Error("Every variant must have a color and size");
+    }
+
+    if (
+      variant?.stock === "" ||
+      variant?.stock == null ||
+      !Number.isInteger(stock) ||
+      stock < 0
+    ) {
+      throw new Error(`Invalid stock for ${color} / ${size}`);
+    }
+
+    const key = `${color.toLowerCase()}::${size.toLowerCase()}`;
+
+    if (seen.has(key)) {
+      throw new Error(`Duplicate variant: ${color} / ${size}`);
+    }
+
+    seen.add(key);
+
+    return { color, size, stock };
+  });
+};
+
+const getTotalStock = (variants) =>
+  variants.reduce((total, variant) => total + variant.stock, 0);
+
 // ==================================
 // CREATE PRODUCT BUSINESS LOGIC
 // ==================================
 
 export const CreateProduct = async (req, res) => {
   try {
-    // Get product fields from request body
     const {
       name,
       description,
       category,
       price,
       salePrice,
-      size,
-      colors,
-      stock,
       isFeatured,
       isActive,
     } = req.body;
 
-    // Validate required fields
     if (
-      !name ||
-      !description ||
+      !name?.trim() ||
+      !description?.trim() ||
       !category ||
-      price == null ||
-      salePrice == null ||
-      size == null ||
-      colors == null ||
-      stock == null
+      req.body.price == null ||
+      req.body.salePrice == null ||
+      req.body.variants == null
     ) {
       return res.status(400).json({
         success: false,
-        message: "All fields are mandatory",
+        message:
+          "Name, description, category, prices, and variants are required",
       });
     }
 
-    // Validate image upload
+    const parsedPrice = Number(price);
+    const parsedSalePrice = Number(salePrice);
+
+    if (
+      !Number.isFinite(parsedPrice) ||
+      !Number.isFinite(parsedSalePrice) ||
+      parsedPrice < 0 ||
+      parsedSalePrice < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Prices must be valid non-negative numbers",
+      });
+    }
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -47,8 +114,14 @@ export const CreateProduct = async (req, res) => {
       });
     }
 
-    // Check whether the product already exists
-    const productExists = await Product.findOne({ name });
+    const normalizedName = name.trim();
+
+    const productExists = await Product.findOne({
+      name: {
+        $regex: `^${normalizedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $options: "i",
+      },
+    });
 
     if (productExists) {
       return res.status(409).json({
@@ -57,31 +130,33 @@ export const CreateProduct = async (req, res) => {
       });
     }
 
-    // Prepare Cloudinary image details
+    const variants = normalizeVariants(req.body.variants);
+    const totalStock = getTotalStock(variants);
+
+    // Derive available colors and sizes from the submitted variants.
+    const colors = [...new Set(variants.map((variant) => variant.color))];
+    const size = [...new Set(variants.map((variant) => variant.size))];
+
     const images = req.files.map((file) => ({
       url: file.path,
       publicId: file.filename,
     }));
 
-    // Prepare product data
-    const productData = {
-      name,
-      description,
+    const newProduct = await Product.create({
+      name: normalizedName,
+      description: description.trim(),
       category,
-      price,
-      salePrice,
+      price: parsedPrice,
+      salePrice: parsedSalePrice,
       size,
       colors,
-      stock,
+      variants,
+      stock: totalStock,
       images,
-      isFeatured: isFeatured ?? false,
-      isActive: isActive ?? true,
-    };
+      isFeatured: isFeatured === true || isFeatured === "true",
+      isActive: isActive !== false && isActive !== "false",
+    });
 
-    // Create and save product
-    const newProduct = await Product.create(productData);
-
-    // Send success response
     return res.status(201).json({
       success: true,
       message: "Product created successfully",
@@ -89,11 +164,10 @@ export const CreateProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("CREATE PRODUCT ERROR:", error);
-    console.error("ERROR MESSAGE:", error.message);
 
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Unable to create product",
     });
   }
 };
@@ -189,20 +263,105 @@ export const getProductById = async (req, res) => {
 export const updateProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await Product.findByIdAndUpdate(id, req.body, { new: true });
 
-    if (!data) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
     }
 
-    res
-      .status(201)
-      .json({ success: true, message: "Product update successfully", data });
+    const updates = { ...req.body };
+
+    // Parse and validate variants whenever they are supplied.
+    if (updates.variants !== undefined) {
+      const variants = normalizeVariants(updates.variants);
+
+      updates.variants = variants;
+      updates.colors = [...new Set(variants.map((variant) => variant.color))];
+      updates.size = [...new Set(variants.map((variant) => variant.size))];
+      updates.stock = getTotalStock(variants);
+    } else if (updates.colors !== undefined || updates.size !== undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Submit variants when changing product colors or sizes",
+      });
+    }
+
+    // Never accept a manually edited total stock without variants.
+    if (updates.stock !== undefined && updates.variants === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Stock must be updated through product variants",
+      });
+    }
+
+    if (updates.price !== undefined) {
+      updates.price = Number(updates.price);
+    }
+
+    if (updates.salePrice !== undefined) {
+      updates.salePrice = Number(updates.salePrice);
+    }
+
+    if (
+      (updates.price !== undefined &&
+        (!Number.isFinite(updates.price) || updates.price < 0)) ||
+      (updates.salePrice !== undefined &&
+        (!Number.isFinite(updates.salePrice) || updates.salePrice < 0))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Prices must be valid non-negative numbers",
+      });
+    }
+
+    // Do not allow arbitrary fields to be updated through req.body.
+    const allowedFields = [
+      "name",
+      "description",
+      "category",
+      "price",
+      "salePrice",
+      "colors",
+      "size",
+      "variants",
+      "stock",
+      "isFeatured",
+      "isActive",
+    ];
+
+    const safeUpdates = {};
+
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        safeUpdates[field] = updates[field];
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { $set: safeUpdates },
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).populate("category");
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
   } catch (error) {
-    console.log("UPDATE_PRODUCT:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error("UPDATE_PRODUCT_ERROR:", error);
+
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Unable to update product",
+    });
   }
 };
 
